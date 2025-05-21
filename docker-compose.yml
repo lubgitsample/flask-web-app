@@ -1,7 +1,6 @@
 version: "3.3"
 services:
   web:
-    build:
-      context: .
+    image: "lubnadocker/flask-web-app"
     ports:
       - "5000:5000"
