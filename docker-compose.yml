@@ -1,6 +1,6 @@
 version: "3.3"
 services:
   web:
-    image: "lubnadocker/flask-web-app:latest"
+    image: "lubnadocker/my-flask-app:latest"
     ports:
       - "5000:5000"
