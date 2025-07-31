@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "my-flask-app.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "my-flask-app.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "my-flask-app.name" . }}
+    spec:
+      containers:
+        - name: flask-container
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 5000
+          env:
+            - name: WELCOME_MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "my-flask-app.fullname" . }}
+                  key: welcomeMessage
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "my-flask-app.fullname" . }}
+                  key: apiKey
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

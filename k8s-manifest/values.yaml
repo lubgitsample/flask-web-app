@@ -1,0 +1,34 @@
+replicaCount: 2
+
+image:
+  repository: lubnadocker/my-flask-app
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5000
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "256Mi"
+  requests:
+    cpu: "250m"
+    memory: "128Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+config:
+  welcomeMessage: "Flask app deployment using Helm"
+
+secret:
+  apiKey: "REPLACE_ME"
+
+env:
+  - name: FLASK_ENV
+    value: production
