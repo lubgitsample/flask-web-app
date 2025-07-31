@@ -1,20 +1,33 @@
-# Use an official Python runtime as a base image
-FROM python:3.11
+# ---------- Stage 1: Builder ----------
+FROM python:3.11-alpine AS builder
 
-# Set the working directory in the container
+# Install build dependencies
+RUN apk add --no-cache build-base
+
+# Create a virtual environment
+WORKDIR /build
+COPY requirements.txt .
+RUN python -m venv /venv \
+ && source /venv/bin/activate \
+ && pip install --upgrade pip \
+ && pip install --no-cache-dir -r requirements.txt
+
+# ---------- Stage 2: Minimal Runtime ----------
+FROM python:3.11-alpine
+
+# Install only runtime dependencies
+RUN apk add --no-cache libffi
+
+# Copy virtual environment from builder
+COPY --from=builder /venv /venv
+ENV PATH="/venv/bin:$PATH"
+
+# Copy application code
 WORKDIR /app
+COPY app.py .
 
-# Copy the application files
-COPY . /app
-
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-RUN useradd lubna
-
-# Expose the port Flask runs on
+# Expose port
 EXPOSE 5000
 
-# Define the command to run the application
-CMD ["python", "app.py"]
-
-LABEL DESCRIPTION="THIS IS THE DOCKER FILE FOR FLASK APPLICATION"
+# Run app using gunicorn for production
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
